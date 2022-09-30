@@ -10,7 +10,7 @@ function MyApp() {
        if (result)
           setCharacters(result);
      });
- }, [] );
+  }, [] );
   return (
     <div className="container">
       <Table characterData={characters} removeCharacter={removeOneCharacter} />
@@ -19,15 +19,28 @@ function MyApp() {
   )
   function updateList(person) { 
     makePostCall(person).then( result => {
-    if (result && result.status === 200)
-      setCharacters([...characters, person] );
+    if (result && result.status === 201)
+      setCharacters([...characters, result.data] );
     });
   }
-  function removeOneCharacter (index) {
+  async function removeOneCharacter (index) {
     const updated = characters.filter((character, i) => {
+        return i !== index
+    });
+    setCharacters(updated);
+    try {
+      let delid = characters[index].id;
+      const response = await axios.delete('http://localhost:5000/users/' + delid);
+      const updated = characters.filter((character, i) => {
         return i !== index
       });
       setCharacters(updated);
+      return response;
+    }
+    catch (error) {
+      console.log(error);
+      return false;
+    }
   }
   async function fetchAll(){
     try {
